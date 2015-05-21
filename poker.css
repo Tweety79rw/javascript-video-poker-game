@@ -7,20 +7,33 @@ body{
  min-width:1230px;
  overflow-y:auto;
  }
+ 
 .title{
 	text-align:center;
 }
-
+#donationButton{
+	position:absolute;
+	left:21%;
+ }
+ .adsbygoogle{
+	width:24%;
+}
+.leftAd{
+  float:left;
+}
+.rightAd{
+	float:right;
+}
 .winDisplay{
 	text-align:center;
 }
 .main{
 	width: 50%;
   height: 30%;
-  z-index: 5;
-    margin:0 auto;
+  z-index: 4;
+    margin:2em auto;
 }
-#help {
+#right-container {
 	position: relative;
   float: right;
   right: 0;
@@ -42,7 +55,7 @@ body{
 	visibility:hidden;
 }
 
-#holdButtonContainer, #commandButtonContainer{
+/*#holdButtonContainer, #commandButtonContainer{
 	height:50px;
 	
 	margin: 0 auto;
@@ -86,7 +99,7 @@ body{
 #commandButtonContainer{
 	border-bottom-left-radius: 10px;
 	border-bottom-right-radius: 10px;
-}
+}*/
 #statusContainer{
 	border-style:solid;
 	border-width:1px;
@@ -99,8 +112,4 @@ body{
 }
 #statusContainer dd{
 	display:inline-block;
-	margin-right:100px;
-}
-.command-button{
-	
 }

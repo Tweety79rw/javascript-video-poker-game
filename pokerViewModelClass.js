@@ -5,19 +5,28 @@ function pokerViewModel(){
 		.append("<div id='main-container' class='main'>");
 		
 	var Body = $("#main-container")
-		.append("<h1 id='title'></h1>")
-		.append("<div id='help'>Pay outs")
-		.append("<dl id='statusContainer'>")
-		.append("<canvas id='cardContainer'></canvas>")
-		.append("<div id='holdButtonContainer'></div>")
-		.append("<div id='commandButtonContainer'></div>")
-		.append("<p id='whoby'>Created by<br>Ryan Wilson</p>");
+		.append("<h1 id='title'></h1>");
 		
+	var right_container = $("<div id='right-container' class='btn-group' role='group'>").appendTo(Body);
+	$("<button id='help' class='btn default-btn' role='button'>Pay outs</button>").appendTo(right_container);
+	$("<button id='menu' class='btn default-btn' role='button'>Main Menu</button></div>").appendTo(right_container);
+	
+	$('#menu').click(function(){
+		location.href='index.html';});
+		
+	$("<dl id='statusContainer'>").appendTo(Body);
+	var card_div = $("<div id='card_div'></div>").appendTo(Body);
+	$("<canvas id='cardContainer'></canvas>").appendTo(card_div);
+	$("<div id='holdButtonContainer' class='btn-group'></div>").appendTo(Body);
+	$("<div id='commandButtonContainer' class='btn-group-lg btn-group-justified' role='group'></div>").appendTo(Body);
+	$("<p id='whoby'>Created by<br>Ryan Wilson</p>").appendTo(Body);
+	
+	
 	var status = $("#statusContainer");
 	
-	status.append("<dt>Cash:</dt><dd id='cash'>")
-		.append("<dt>Bet:</dt><dd id='bet'></dd>")
-		.append("<dt>Status:</dt><dd id='winner'></dd>");
+	status.append("<dt>Cash:</dt><dd id='cash' style='margin-right:50px;'>")
+		.append("<dt>Bet:</dt><dd id='bet' style='margin-right:50px;'></dd>")
+		.append("<dt>Status:</dt><dd id='winner' style='margin-right:100px;'></dd>");
 	
 	var title = $("#title");
 	var Winner = $("#winner");
@@ -42,11 +51,13 @@ function pokerViewModel(){
 	var cardsFliped = false;
 	var poker = new PokerModel();
 	var draw = 0;
-	
-	$("#help").attr("class","hold-button");
+	var holdCanvas =$("<canvas id='hold_area'></canvas>").appendTo(card_div);
+	holdCanvas[0].width = $(document).width()*.5;
+	holdCanvas[0].height = $(document).height()*.3;
+	holdCanvas.css('z-index','5').on("click",canvasClickEvent);
     Canvas[0].width = $(document).width()*.5;
 	Canvas[0].height = $(document).height()*.3;
-	Canvas.on("click",canvasClickEvent);
+	Canvas.css({'position':'absolute','z-index':'-1'});
 	cash.html(poker._cash);
 	title.attr("class","title").html("Video Poker Game");
 	Winner.attr("class","winDisplay").html("This is Where a win is shown");
@@ -54,15 +65,15 @@ function pokerViewModel(){
 	
 	
 	for(var i = 1;i <= 5; i++){
-		holdbuttons.append("<div id=\'holdbutton_"+i+"\'></div>")
-			$("#holdbutton_"+i).attr("class","hold-button")
+		$("<button id=\'holdbutton_"+i+"\'></button>").appendTo(holdbuttons);
+		$("#holdbutton_"+i).attr("class","btn default-btn").css('display','none')
 			.html("HOLD")
 			.on("click", holdButtonHandle);
 	}
 	for(var i = 1;i <= 4; i++){
-		commandButtons.append("<div id=\'commandbutton_"+i+"\'></div>")
-			$("#commandbutton_"+i).attr("class","command-button")
-			.html((i==1) ? "Deal" : (i==2) ? "Max Bet" : (i==3) ? "Add 5" : (i==4) ? "Remove 5" : "")
+		$("<div class='btn-group' role='group'><button id=\'commandbutton_"+i+"\'></button></div>").appendTo(commandButtons);
+		$("#commandbutton_"+i).attr("class","btn default-btn")
+			.text((i==1) ? "Deal" : (i==2) ? "Max Bet" : (i==3) ? "Add 5" : (i==4) ? "Remove 5" : "")
 			.on("click",commandButtonHandle)
 			.on("mouseover",mouseEnter)
 			.on("mouseleave",mouseLeave);
@@ -72,42 +83,74 @@ function pokerViewModel(){
 	 *	callback function for the hold buttons
 	 */
 	function holdButtonHandle(){
-		switch(this.id){
-			case "holdbutton_1":
-				if(_firstCardHold)
-					_firstCardHold=false;
-				else
-					_firstCardHold = true;
-				break;
-			case "holdbutton_2":
-				if(_secondCardHold)
-					_secondCardHold=false;
-				else
-					_secondCardHold = true;
-				break;
-			case "holdbutton_3":
-				if(_thirdCardHold)
-					_thirdCardHold = false;
-				else
-					_thirdCardHold = true;
-				break;
-			case "holdbutton_4":
-				if(_fourthCardHold)
-					_fourthCardHold = false;
-				else
-					_fourthCardHold = true;
-				break;
-			case "holdbutton_5":
-				if(_fifthCardHold)
-					_fifthCardHold = false;
-				else
-					_fifthCardHold = true;
-				break;
+		if(draw ===1){
+			ctx = holdCanvas[0].getContext("2d");
+			ctx.font="70px Arial";
+			ctx.fillStyle = 'black';
+			var cardWidth = Canvas.width()/5;
+			switch(this.id){
+				case "holdbutton_1":
+					if(_firstCardHold){
+						_firstCardHold=false;
+						ctx.clearRect(0,0,cardWidth,holdCanvas.height());
+					}else{
+						_firstCardHold = true;
+						ctx.fillRect(0,holdCanvas.height()/2-80,cardWidth,100);
+						ctx.fillStyle = 'white';
+						ctx.fillText("Held",10,holdCanvas.height()/2);
+					}
+					break;
+				case "holdbutton_2":
+					if(_secondCardHold){
+						_secondCardHold=false;
+						ctx.clearRect(cardWidth,0,cardWidth,holdCanvas.height());
+					}else{
+						_secondCardHold = true;
+						ctx.fillRect(cardWidth,holdCanvas.height()/2-80,cardWidth,100);
+						ctx.fillStyle = 'white';
+						ctx.fillText("Held",10+cardWidth,holdCanvas.height()/2);
+					}
+					break;
+				case "holdbutton_3":
+					if(_thirdCardHold){
+						_thirdCardHold = false;
+						ctx.clearRect(2*cardWidth,0,cardWidth,holdCanvas.height());
+					}else{
+						_thirdCardHold = true;
+						ctx.fillRect(2*cardWidth,holdCanvas.height()/2-80,cardWidth,100);
+						ctx.fillStyle = 'white';
+						ctx.fillText("Held",10+2*cardWidth,holdCanvas.height()/2);
+					}
+					break;
+				case "holdbutton_4":
+					if(_fourthCardHold){
+						_fourthCardHold = false;
+						ctx.fillStyle = 'white';
+						ctx.clearRect(3*cardWidth,0,cardWidth,holdCanvas.height());
+					}else{
+						_fourthCardHold = true;
+						ctx.fillRect(3*cardWidth,holdCanvas.height()/2-80,cardWidth,100);
+						ctx.fillStyle = 'white';
+						ctx.fillText("Held",10+3*cardWidth,holdCanvas.height()/2);
+					}
+					break;
+				case "holdbutton_5":
+					if(_fifthCardHold){
+						_fifthCardHold = false;
+						ctx.clearRect(4*cardWidth,0,cardWidth,holdCanvas.height());
+					}else{
+						_fifthCardHold = true;
+						ctx.fillRect(4*cardWidth,holdCanvas.height()/2-80,cardWidth,100);
+						ctx.fillStyle = 'white';
+						ctx.fillText("Held",10+4*cardWidth,holdCanvas.height()/2);
+					}
+					break;
+			}
+			if($(this).hasClass("held"))
+				$(this).removeClass("held");
+			else
+				$(this).addClass("held");
 		}
-		if($(this).hasClass("held"))
-			$(this).removeClass("held");
-		else
-			$(this).addClass("held");
 	}
 	
 	/*
@@ -155,8 +198,7 @@ function pokerViewModel(){
 		if(!cardsFliped)
 			flipCards();
 		if(poker._bet < +50 && poker._cash >= +50){
-			firstCardHold = secondCardHold = thirdCardHold = fourthCardHold = fifthCardHold = false;
-			$(".held").removeClass("held");
+			resetHeld();
 			var temp = poker._bet;
 			poker._bet = +50;
 			poker._cash -= (50 - temp);
@@ -181,6 +223,7 @@ function pokerViewModel(){
 	 */
 	function canvasClickEvent(e){
 			var mouseX = $(this).offset().left, mouseY = $(this).offset().top;
+			console.log("clicked the canvas");
 			switch(Math.floor((e.pageX - mouseX)/(this.width/5)%5)){
 			case 0:
 				$("#holdbutton_1").trigger("click");
@@ -198,8 +241,10 @@ function pokerViewModel(){
 				$("#holdbutton_5").trigger("click");
 				break;
 			default:
+				console.log("error didn't detect where the click came from");
 				break
 			}
+			return false;
 	}
 
 	/*
@@ -210,7 +255,7 @@ function pokerViewModel(){
 		if(poker._bet > 0 && draw == 0){
 			if(!cardsFliped)
 				flipCards();
-			firstCardHold = secondCardHold = thirdCardHold = fourthCardHold = fifthCardHold = false;
+			resetHeld();
 			poker._bet -= +5;
 			poker._cash += +5;
 			
@@ -218,7 +263,15 @@ function pokerViewModel(){
 		bet.html(poker._bet);
 		cash.html(poker._cash);
 	}
-
+	/*
+	 *  function to reset the held fields
+	 */
+	function resetHeld(){
+		var heldCtx = holdCanvas[0].getContext("2d");
+		_firstCardHold = _secondCardHold = _thirdCardHold = _fourthCardHold = _fifthCardHold = false;
+		$(".held").removeClass("held");
+		heldCtx.clearRect(0,0,holdCanvas.width(),holdCanvas.height());
+	}
 	/*
 	 *  Call back function for the add 5 to bet button
 	 *	This adds 5 to the bet and removes 5 from cash
@@ -227,10 +280,9 @@ function pokerViewModel(){
 		if (poker._bet < +50 && poker._cash >= +5){
 			if(!cardsFliped)
 				flipCards();
-			firstCardHold = secondCardHold = thirdCardHold = fourthCardHold = fifthCardHold = false;
-			$(".held").removeClass("held");
-		   poker._bet += +5;
-		   poker._cash -= +5;
+			resetHeld();
+			poker._bet += +5;
+			poker._cash -= +5;
 		}
 		bet.html(poker._bet);
 		cash.html(poker._cash);
@@ -245,8 +297,6 @@ function pokerViewModel(){
 		img.src = "animal-grab-back.jpg";
 		ctx = Canvas[0].getContext("2d");
 		var cardWidth = Canvas.width()/5;
-		console.log(Canvas.width());
-		console.log(cardWidth);
 		img.onload = function() {
 			for(var i = 0; i < 5;i++){
 				ctx.drawImage(img,0,0,img.width,img.height,i*cardWidth,0,cardWidth,Canvas.height());
@@ -275,8 +325,7 @@ function pokerViewModel(){
 				case 0:
 					
 					poker.cards.shuffle();
-					_firstCardHold = _secondCardHold = _thirdCardHold = _fourthCardHold = _fifthCardHold = false;
-					$(".held").removeClass("held");
+					resetHeld();
 					firstCard = poker.cards.dealCard();
 					secondCard = poker.cards.dealCard();
 					thirdCard = poker.cards.dealCard();
@@ -285,7 +334,7 @@ function pokerViewModel(){
 					draw++;
 					Winner.html("Draw " + draw);
 					break;
-				case 1:
+				/*case 1:
 					if(!_firstCardHold)
 						firstCard = poker.cards.dealCard();
 					if(!_secondCardHold)
@@ -298,8 +347,8 @@ function pokerViewModel(){
 						fifthCard = poker.cards.dealCard();
 					draw++;
 					Winner.html("Draw " + draw);
-					break;
-				case 2:
+					break;*/
+				case 1:
 					cardsFliped = false;
 					if(!_firstCardHold)
 						firstCard = poker.cards.dealCard();
@@ -312,8 +361,7 @@ function pokerViewModel(){
 					if(!_fifthCardHold)
 						fifthCard = poker.cards.dealCard();
 					draw = 0;
-					firstCardHold = secondCardHold = thirdCardHold = fourthCardHold = fifthCardHold = false;
-					$(".held").removeClass("held");
+					resetHeld();
 					break;
 			}
 			refresh();
